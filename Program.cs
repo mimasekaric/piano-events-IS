@@ -1,5 +1,6 @@
 ﻿using Npgsql;
 using PijanistickiDogadjajApp.DAO;
+using PijanistickiDogadjajApp.DTO;
 using PijanistickiDogadjajApp.Services;
 using PijanistickiDogadjajApp.UI;
 
@@ -11,12 +12,19 @@ namespace PijanistickiDogadjajApp
         {
 
             string connectionString = "Host=localhost;Port=5432;Database=pijanisticki;Username=postgres;Password=super";
-            var gostDAO = new GostDAO(connectionString);
-            var gostService = new GostService(gostDAO);
-            var gostUI = new GostUIHandler(gostService);
+            //var gostDAO = new GostDAO(connectionString);
+            //var gostService = new GostService(gostDAO);
+            //var gostUI = new GostUIHandler(gostService);
+            //gostUI.PrikaziStatistiku();
 
-            gostUI.PrikaziStatistiku();
-            Console.WriteLine("Hello, World!");
+
+            //var dao = new MuzickaSkolaDAO(connectionString);
+            //var service = new ComplexQueryService(dao);
+            //var ui = new ComplexQueryUIHandler(service);
+
+            /*ui.PrikaziZaradu()*/;
+            var handler = new TransactionUIHandler(connectionString);
+            handler.PokreniTransakciju();
         }
     }
 }
