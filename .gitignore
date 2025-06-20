@@ -1,0 +1,48 @@
+# Ignore Visual Studio files
+.vs/
+*.user
+*.suo
+
+# Build results
+bin/
+obj/
+out/
+
+# Rider IDE
+.idea/
+
+# User-specific files
+*.rsuser
+*.sln.docstates
+
+# Auto-generated files
+*.generated.cs
+
+# Logs
+*.log
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.tmp
+
+# dotenv files (ako koristiš za konekcione stringove)
+.env
+.env.*
+
+# NuGet packages
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+
+# Optional: database backups
+*.sql
+*.dump
+
+# Optional: secrets or local config
+appsettings.Development.json
+secrets.json
