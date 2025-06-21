@@ -23,8 +23,16 @@ namespace PijanistickiDogadjajApp
             //var ui = new ComplexQueryUIHandler(service);
 
             /*ui.PrikaziZaradu()*/;
-            var handler = new TransactionUIHandler(connectionString);
-            handler.PokreniTransakciju();
+            var transactiondDao = new TransactionDAO(connectionString);
+            var transactionService = new TransactionService(transactiondDao);
+            //var transactionUI = new TransactionUIHandler(transactionService);
+            //transactionUI.PokreniTransakciju();
+
+
+            var complexQueryDao = new ComplexQueryDAO(connectionString);
+            var complexQueryService = new ComplexQueryService(complexQueryDao);
+            var complexQueryUI = new ComplexQueryUIHandler(complexQueryService, transactionService);
+            complexQueryUI.PrikaziTakmicare();
         }
     }
 }

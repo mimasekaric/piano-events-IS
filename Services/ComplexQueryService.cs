@@ -10,9 +10,10 @@ namespace PijanistickiDogadjajApp.Services
 {
     public class ComplexQueryService
     {
-        private readonly MuzickaSkolaDAO dao;
+        private readonly ComplexQueryDAO dao;
+        private readonly TransactionDAO transactionDAO;
 
-        public ComplexQueryService(MuzickaSkolaDAO dao)
+        public ComplexQueryService(ComplexQueryDAO dao)
         {
             this.dao = dao;
         }
@@ -20,6 +21,12 @@ namespace PijanistickiDogadjajApp.Services
         public List<SkolaZaradaDTO> GetZarada(int godina)
         {
             return dao.GetZaradaPoSkolama(godina);
+        }
+
+        public List<NastupDTO> VratiTakmicarePoTakmicenju(int idTakmicenja)
+        {
+            
+            return dao.GetTakmicariPoTakmicenju(idTakmicenja);
         }
     }
 }

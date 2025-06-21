@@ -75,10 +75,11 @@ namespace PijanistickiDogadjajApp.DAO
                 Console.WriteLine("Uplata dodana sa ID: " + idUplate);
                 // 2. Ubacujemo nastup vezan za takmičenje
                 var nastupCmd = new NpgsqlCommand(@"
-                INSERT INTO nastup (id_nast, dat_nast, kateg_nast, diploma_id_dipl, takmicenje_id_dog)
-                VALUES (DEFAULT, @date, 'prva', NULL, @idTak)", conn, tx);
+                INSERT INTO nastup (id_nast, dat_nast, kateg_nast, diploma_id_dipl, takmicenje_id_dog, pijanista_mbr)
+                VALUES (DEFAULT, @date, 'prva', NULL, @idTak, @mbr)", conn, tx);
                 nastupCmd.Parameters.AddWithValue("idTak", idTakmicenja);
                 nastupCmd.Parameters.AddWithValue("date", izabranoTakmicenjeDatum);
+                nastupCmd.Parameters.AddWithValue("mbr", mbr);
                 nastupCmd.ExecuteNonQuery();
                 Console.WriteLine("Nastup uspešno dodat.");
 

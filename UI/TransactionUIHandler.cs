@@ -1,5 +1,6 @@
 ﻿using PijanistickiDogadjajApp.DAO;
 using PijanistickiDogadjajApp.DTO;
+using PijanistickiDogadjajApp.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,16 +11,16 @@ namespace PijanistickiDogadjajApp.UI
 {
     public class TransactionUIHandler
     {
-        private readonly TransactionDAO transactionDAO;
+        private readonly TransactionService transactionService;
    
-        public TransactionUIHandler(string connectionString)
+        public TransactionUIHandler(TransactionService transactionService)
         {
-            this.transactionDAO = new TransactionDAO(connectionString);
+            this.transactionService = transactionService;
         }
 
         public void PokreniTransakciju()
         {
-            List<TakmicenjeDTO> takmicenja = transactionDAO.GetSvaTakmicenja();
+            List<TakmicenjeDTO> takmicenja = transactionService.GetSvaTakmicenja();
 
             if (takmicenja.Count == 0)
             {
@@ -53,7 +54,7 @@ namespace PijanistickiDogadjajApp.UI
             long mbr = long.Parse(Console.ReadLine());
 
            
-            bool uspjesno = transactionDAO.UplataINastup(mbr, izabranoTakmicenjeId, izabranoTakmicenjeDatum);
+            bool uspjesno = transactionService.PokreniTransakciju(mbr, izabranoTakmicenjeId, izabranoTakmicenjeDatum);
 
             if (uspjesno)
                 Console.WriteLine("Transakcija uspešno izvršena (uplata + nastup).");
