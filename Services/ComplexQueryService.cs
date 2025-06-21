@@ -13,9 +13,9 @@ namespace PijanistickiDogadjajApp.Services
         private readonly ComplexQueryDAO dao;
         private readonly TransactionDAO transactionDAO;
 
-        public ComplexQueryService(ComplexQueryDAO dao)
+        public ComplexQueryService(string connectionString)
         {
-            this.dao = dao;
+            this.dao = new ComplexQueryDAO(connectionString);
         }
 
         public List<SkolaZaradaDTO> GetZarada(int godina)

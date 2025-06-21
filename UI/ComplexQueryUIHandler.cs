@@ -20,6 +20,47 @@ namespace PijanistickiDogadjajApp.UI
             this.transactionService = transactionService;
         }
 
+
+
+        public void handleComplexUIMenu()
+        {
+            bool izlaz = false;
+
+            while (!izlaz)
+            {
+                Console.Clear();
+                Console.WriteLine("=== Kompleksni upiti ===");
+                Console.WriteLine("1. Prikaz takmičara");
+                Console.WriteLine("2. Prikaz zarade");
+                Console.WriteLine("0. Povratak u glavni meni");
+                Console.Write("Izaberite opciju: ");
+
+                string unos = Console.ReadLine();
+
+                switch (unos)
+                {
+                    case "1":
+                        PrikaziTakmicare();
+                        break;
+                    case "2":
+                        PrikaziZaradu();
+                        break;
+                    case "0":
+                        izlaz = true;
+                        break;
+                    default:
+                        Console.WriteLine("Nepoznata opcija, pokušajte ponovo.");
+                        break;
+                }
+
+                if (!izlaz)
+                {
+                    Console.WriteLine("\nPritisnite bilo koji taster za nastavak...");
+                    Console.ReadKey();
+                }
+            }
+        }
+
         public void PrikaziZaradu()
         {
             Console.Write("Unesite godinu: ");

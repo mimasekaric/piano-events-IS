@@ -12,27 +12,8 @@ namespace PijanistickiDogadjajApp
         {
 
             string connectionString = "Host=localhost;Port=5432;Database=pijanisticki;Username=postgres;Password=super";
-            //var gostDAO = new GostDAO(connectionString);
-            //var gostService = new GostService(gostDAO);
-            //var gostUI = new GostUIHandler(gostService);
-            //gostUI.PrikaziStatistiku();
-
-
-            //var dao = new MuzickaSkolaDAO(connectionString);
-            //var service = new ComplexQueryService(dao);
-            //var ui = new ComplexQueryUIHandler(service);
-
-            /*ui.PrikaziZaradu()*/;
-            var transactiondDao = new TransactionDAO(connectionString);
-            var transactionService = new TransactionService(transactiondDao);
-            //var transactionUI = new TransactionUIHandler(transactionService);
-            //transactionUI.PokreniTransakciju();
-
-
-            var complexQueryDao = new ComplexQueryDAO(connectionString);
-            var complexQueryService = new ComplexQueryService(complexQueryDao);
-            var complexQueryUI = new ComplexQueryUIHandler(complexQueryService, transactionService);
-            complexQueryUI.PrikaziTakmicare();
+            MainUIHandler mainUIHandler = new MainUIHandler(connectionString);
+            mainUIHandler.handleMenu();
         }
     }
 }

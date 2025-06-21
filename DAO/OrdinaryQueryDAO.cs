@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace PijanistickiDogadjajApp.DAO
 {
-    public class GostDAO
+    public class OrdinaryQueryDAO
     {
         private readonly string connectionString;
 
-        public GostDAO(string connectionString)
+        public OrdinaryQueryDAO(string connectionString)
         {
             this.connectionString = connectionString;
         }

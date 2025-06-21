@@ -16,9 +16,9 @@ namespace PijanistickiDogadjajApp.Services
 
         private readonly TransactionDAO transactionDAO;
 
-        public TransactionService(TransactionDAO transactionDAO)
+        public TransactionService(string connectionString)
         {
-            this.transactionDAO = transactionDAO;
+            this.transactionDAO = new TransactionDAO(connectionString);
         }
 
         public List<TakmicenjeDTO> GetSvaTakmicenja()

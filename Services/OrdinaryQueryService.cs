@@ -8,15 +8,15 @@ using System.Threading.Tasks;
 
 namespace PijanistickiDogadjajApp.Services
 {
-    public class GostService
+    public class OrdinaryQueryService
     {
       
         
-            private readonly GostDAO gostDAO;
+            private readonly OrdinaryQueryDAO gostDAO;
 
-            public GostService(GostDAO gostDAO)
+            public OrdinaryQueryService(string connectionString)
             {
-                this.gostDAO = gostDAO;
+                this.gostDAO = new OrdinaryQueryDAO(connectionString);
             }
 
             public List<GostKartaDTO> VratiStatistikuKarti()

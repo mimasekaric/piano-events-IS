@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace PijanistickiDogadjajApp.UI
 {
-    public class GostUIHandler
+    public class OrdinaryQueryUIHandler
     {
 
-        private readonly GostService gostService;
+        private readonly OrdinaryQueryService gostService;
 
-        public GostUIHandler(GostService gostService)
+        public OrdinaryQueryUIHandler(OrdinaryQueryService gostService)
         {
             this.gostService = gostService;
         }
