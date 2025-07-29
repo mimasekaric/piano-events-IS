@@ -65,15 +65,17 @@ namespace PijanistickiDogadjajApp.DAO
 
             try
             {
-                // 1. Ubacujemo uplatu sa statusom 'obrada', iznos 6000
+                // 1. Ubacujem uplatu sa statusom 'obrada'
                 var uplataCmd = new NpgsqlCommand(@"
                 INSERT INTO uplata (id_uplt, iznos_uplt, stat_uplt, dat_uplt, pijanista_mbr)
                 VALUES (DEFAULT, 6000, 'obrada', CURRENT_DATE, @mbr)
                 RETURNING id_uplt", conn, tx);
                 uplataCmd.Parameters.AddWithValue("mbr", mbr);
                 int idUplate = (int)uplataCmd.ExecuteScalar();
-                Console.WriteLine("Uplata dodana sa ID: " + idUplate);
-                // 2. Ubacujemo nastup vezan za takmičenje
+                Console.WriteLine("Uplata dodana. " + idUplate);
+
+
+                // 2. Ubacujem nastup vezan za takmičenje
                 var nastupCmd = new NpgsqlCommand(@"
                 INSERT INTO nastup (id_nast, dat_nast, kateg_nast, diploma_id_dipl, takmicenje_id_dog, pijanista_mbr)
                 VALUES (DEFAULT, @date, 'prva', NULL, @idTak, @mbr)", conn, tx);
@@ -83,10 +85,29 @@ namespace PijanistickiDogadjajApp.DAO
                 nastupCmd.ExecuteNonQuery();
                 Console.WriteLine("Nastup uspešno dodat.");
 
+
+                //3. Ažuriram finansijsku karticu
+                var updateOsobaFinKartiCmd = new NpgsqlCommand(@"
+                UPDATE osoba
+                SET fin_kartica = fin_kartica - 6000 
+                WHERE mbr = @mbrOsoba;", conn, tx);
+                updateOsobaFinKartiCmd.Parameters.AddWithValue("mbrOsoba", mbr);
+                int updatedRows = updateOsobaFinKartiCmd.ExecuteNonQuery();
+                if (updatedRows > 0)
+                {
+                    Console.WriteLine("Finansijski karton osobe ažuriran.");
+                }
+                else
+                {
+                    Console.WriteLine("Upozorenje: Nije pronađena osoba za ažuriranje finansijskog kartona (MBR: " + mbr + ").");
+                }
+
+
+
                 // 4. Ažuriraj uplatu - postavi status na 'uspjesna'
                 var updateUplataCmd = new NpgsqlCommand(@"
-        UPDATE uplata SET stat_uplt = 'uspjesna'
-        WHERE id_uplt = @idUplata;", conn, tx);
+                UPDATE uplata SET stat_uplt = 'uspjesna'
+                WHERE id_uplt = @idUplata;", conn, tx);
                 updateUplataCmd.Parameters.AddWithValue("idUplata", idUplate);
                 updateUplataCmd.ExecuteNonQuery();
 
@@ -104,5 +125,5 @@ namespace PijanistickiDogadjajApp.DAO
                 tx.Rollback();
                 return false;
             }
-        }   }
+    }   }
 }

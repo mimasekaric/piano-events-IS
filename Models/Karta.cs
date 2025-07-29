@@ -14,10 +14,10 @@ namespace PijanistickiDogadjajApp.Models
         public string KategorijaKarte { get; set; }
         public int? GostMbr { get; set; }
 
-        // Prazan konstruktor
+
         public Karta() { }
 
-        // Konstruktor sa svim poljima
+   
         public Karta(int rbrKrt, DateTime? datumKupovine, double cijenaKarte, string kategorijaKarte, int? gostMbr)
         {
             RbrKrt = rbrKrt;

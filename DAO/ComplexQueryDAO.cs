@@ -23,21 +23,46 @@ namespace PijanistickiDogadjajApp.DAO
             var rezultati = new List<SkolaZaradaDTO>();
 
             string sql = @"
-        SELECT 
-            ms.naz_msk AS NazivSkole,
-            COALESCE(SUM(CAST(ka.cijena_krt AS NUMERIC)), 0) AS UkupnaZarada,
-            COALESCE(SUM(CASE WHEN k.vrst = 'beneficijarni' THEN CAST(ka.cijena_krt AS NUMERIC) ELSE 0 END), 0) AS ZaradaHumanitarnih,
-            COUNT(DISTINCT k.id_dog) AS UkupanBrojKoncerata
-        FROM muzicka_skola ms
-        LEFT JOIN sala s ON ms.id_msk = s.muzicka_skola_id_msk
-        LEFT JOIN se_realizuje sr ON s.id_sala = sr.sala_id_sala
-        LEFT JOIN pijanisticki_dogadjaj pd ON sr.pijanisticki_dogadjaj_id_dog = pd.id_dog
-        LEFT JOIN koncert k ON pd.id_dog = k.id_dog
-        LEFT JOIN karta ka ON k.karta_rbr_krt = ka.rbr_krt
-        WHERE k.stat = 'aktivan' OR k.stat IS NULL
-        GROUP BY ms.naz_msk
-        HAVING MAX(EXTRACT(YEAR FROM pd.dat_poc)) > @godina OR MAX(pd.dat_poc) IS NULL
-        ORDER BY UkupnaZarada DESC;";
+                  WITH UkupniKoncerti AS (
+                    SELECT
+                        ms.id_msk,
+                        ms.naz_msk,
+                        COALESCE(SUM(CAST(ka.cijena_krt AS NUMERIC)), 0) AS UkupnaZarada,
+                        COUNT(DISTINCT k.id_dog) AS UkupanBrojKoncerata
+   
+                    FROM muzicka_skola ms
+                    INNER JOIN sala s ON ms.id_msk = s.muzicka_skola_id_msk
+                    INNER JOIN se_realizuje sr ON s.id_sala = sr.sala_id_sala
+                    INNER JOIN pijanisticki_dogadjaj pd ON sr.pijanisticki_dogadjaj_id_dog = pd.id_dog
+                    INNER JOIN koncert k ON pd.id_dog = k.id_dog
+                    INNER JOIN karta ka ON k.karta_rbr_krt = ka.rbr_krt
+                    WHERE k.stat = 'aktivan' AND EXTRACT(YEAR FROM pd.dat_poc) = @godina
+                    GROUP BY ms.id_msk, ms.naz_msk
+                ),
+                BeneficijarniKoncerti AS (
+                    SELECT
+                        ms.id_msk,
+                        ms.naz_msk,
+     
+                        COALESCE(SUM(CAST(ka.cijena_krt AS NUMERIC)), 0) AS ZaradaHumanitarnih
+                    FROM muzicka_skola ms
+                    INNER JOIN sala s ON ms.id_msk = s.muzicka_skola_id_msk
+                    INNER JOIN se_realizuje sr ON s.id_sala = sr.sala_id_sala
+                    INNER JOIN pijanisticki_dogadjaj pd ON sr.pijanisticki_dogadjaj_id_dog = pd.id_dog
+                    INNER JOIN koncert k ON pd.id_dog = k.id_dog
+                    INNER JOIN karta ka ON k.karta_rbr_krt = ka.rbr_krt
+                    WHERE k.stat = 'aktivan' AND k.vrst = 'beneficijarni' AND EXTRACT(YEAR FROM pd.dat_poc) = @godina
+                    GROUP BY ms.id_msk, ms.naz_msk
+                )
+                SELECT
+                    ms.naz_msk AS NazivSkole,
+                    COALESCE(uk.UkupnaZarada, 0) AS UkupnaZarada,
+                    COALESCE(bk.ZaradaHumanitarnih, 0) AS ZaradaHumanitarnih,
+                    COALESCE(uk.UkupanBrojKoncerata, 0) AS UkupanBrojKoncerata
+                FROM muzicka_skola ms 
+                LEFT JOIN UkupniKoncerti uk ON ms.id_msk = uk.id_msk 
+                LEFT JOIN BeneficijarniKoncerti bk ON ms.id_msk = bk.id_msk 
+                ORDER BY COALESCE(uk.UkupnaZarada, 0) DESC;";
 
             using var conn = new NpgsqlConnection(connectionString);
             conn.Open();
@@ -66,23 +91,23 @@ namespace PijanistickiDogadjajApp.DAO
             var rezultati = new List<NastupDTO>();
 
             string sql = @"
-            SELECT
-    o.ime,
-    o.prez,
-    o.god,
-    d.tip_dipl,
-    d.bod,
-    COALESCE(SUM(k.trajanje_min), 0) AS ukupno_trajanje_min
-FROM nastup n
-JOIN pijanista p ON n.pijanista_mbr = p.mbr
-JOIN osoba o ON p.mbr = o.mbr
-JOIN diploma d ON n.diploma_id_dipl = d.id_dipl
-JOIN cini c ON n.id_nast = c.nastup_id_nast
-JOIN kompozicija k ON c.kompozicija_id_komp = k.id_komp
-WHERE n.takmicenje_id_dog = 101
-  AND n.kateg_nast = 'druga'
-GROUP BY o.ime, o.prez, o.god, d.tip_dipl, d.bod
-ORDER BY d.bod DESC;";
+                SELECT
+                o.ime,
+                o.prez,
+                o.god,
+                COALESCE(d.tip_dipl, 'Nema') AS tip_dipl,
+                COALESCE(CAST(d.bod AS TEXT), 'Nema') AS bod,
+                COALESCE(SUM(k.trajanje_min), 0) AS ukupno_trajanje_min
+            FROM osoba o
+            JOIN pijanista p ON o.mbr = p.mbr
+            LEFT JOIN nastup n ON p.mbr = n.pijanista_mbr
+                AND n.takmicenje_id_dog = @idTak
+            LEFT JOIN diploma d ON n.diploma_id_dipl = d.id_dipl
+            LEFT JOIN cini c ON n.id_nast = c.nastup_id_nast
+            LEFT JOIN kompozicija k ON c.kompozicija_id_komp = k.id_komp
+            GROUP BY o.ime, o.prez, o.god, d.tip_dipl, d.bod
+            HAVING COALESCE(SUM(k.trajanje_min), 0) BETWEEN 0 AND 20
+            ORDER BY d.bod DESC;";
 
             using var conn = new NpgsqlConnection(connectionString);
             conn.Open();
@@ -99,9 +124,20 @@ ORDER BY d.bod DESC;";
                     Prezime = reader.GetString(1),
                     GodRodjenja = reader.GetInt32(2),
                     TipDiplome = reader.GetString(3),
-                    Bodovi = reader.GetFloat(4),
-                    UkupnoTrajanjeMin = reader.GetFloat(5)
                 };
+                string bodoviString = reader.GetString(4);
+                float bodoviValue;
+                if (float.TryParse(bodoviString, out bodoviValue))
+                {
+                    takmicar.Bodovi = bodoviValue;
+                }
+                else
+                {
+                 
+                    takmicar.Bodovi = 0;
+                }
+
+                takmicar.UkupnoTrajanjeMin = reader.GetFloat(5);
                 rezultati.Add(takmicar);
             }
 

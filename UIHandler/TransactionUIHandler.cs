@@ -42,13 +42,13 @@ namespace PijanistickiDogadjajApp.UI
                 return;
             }
 
-            // ✔️ Dohvatanje ID-ja iz izbora korisnika
+         
             int izabranoTakmicenjeId = takmicenja[izbor - 1].IdDog;
             DateTime izabranoTakmicenjeDatum = takmicenja[izbor - 1].Datum;
 
             Console.WriteLine($"Izabrali ste takmičenje ID: {izabranoTakmicenjeId}");
 
-            // Nastavak logike: unos JMBG, kreiranje uplate, nastupa, transakcija itd.
+     
 
             Console.Write("Unesite matični broj pijaniste: ");
             long mbr = long.Parse(Console.ReadLine());

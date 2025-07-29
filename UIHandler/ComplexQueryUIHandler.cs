@@ -102,18 +102,19 @@ namespace PijanistickiDogadjajApp.UI
                 return;
             }
 
-            // ✔️ Dohvatanje ID-ja iz izbora korisnika
+     
             int idTakmicenja = takmicenja[izbor - 1].IdDog;
 
 
             var takmicari = service.VratiTakmicarePoTakmicenju(idTakmicenja);
 
-            Console.WriteLine($"Takmicari za takmicenje ID: {idTakmicenja}\n");
-            Console.WriteLine("Ime\tPrezime\tGodRodj\tTip diplome\tBodovi\tTrajanje(min)");
+            Console.WriteLine($"Takmicari:");
+            Console.WriteLine("Ime               Prezime           God.Rođ.  Tip Diplome         Bodovi    Trajanje(min)");
+            Console.WriteLine("-------------------------------------------------------------------------------------------------"); // Dodata linija za bolji vizuelni razmak
 
             foreach (var t in takmicari)
             {
-                Console.WriteLine($"{t.Ime}\t{t.Prezime}\t{t.GodRodjenja}\t{t.TipDiplome}\t{t.Bodovi}\t{t.UkupnoTrajanjeMin}");
+                Console.WriteLine($"{t.Ime,-18}{t.Prezime,-20}{t.GodRodjenja,-10}{t.TipDiplome,-20}{t.Bodovi,-10:F2}{t.UkupnoTrajanjeMin,-15:F2}");
             }
         }
     }
