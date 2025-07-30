@@ -65,31 +65,46 @@ namespace PijanistickiDogadjajApp.DAO
 
             try
             {
-                // 1. Ubacujem uplatu sa statusom 'obrada'
+        
+                int noviIdUplate;
+                using (var cmd = new NpgsqlCommand("SELECT COALESCE(MAX(id_uplt), 0) FROM uplata", conn, tx))
+                {
+                    noviIdUplate = (int)cmd.ExecuteScalar() + 1;
+                }
+
+                // 1. Ubacujem uplatu sa statusom 'obrada' 
                 var uplataCmd = new NpgsqlCommand(@"
                 INSERT INTO uplata (id_uplt, iznos_uplt, stat_uplt, dat_uplt, pijanista_mbr)
-                VALUES (DEFAULT, 6000, 'obrada', CURRENT_DATE, @mbr)
-                RETURNING id_uplt", conn, tx);
+                VALUES (@idUplata, 6000, 'obrada', CURRENT_DATE, @mbr)", conn, tx);
+                uplataCmd.Parameters.AddWithValue("idUplata", noviIdUplate);
                 uplataCmd.Parameters.AddWithValue("mbr", mbr);
-                int idUplate = (int)uplataCmd.ExecuteScalar();
-                Console.WriteLine("Uplata dodana. " + idUplate);
+                uplataCmd.ExecuteNonQuery(); 
+                Console.WriteLine("Uplata dodana. ID uplate: " + noviIdUplate);
 
+
+
+                int noviIdNastupa;
+                using (var cmd = new NpgsqlCommand("SELECT COALESCE(MAX(id_nast), 0) FROM nastup", conn, tx))
+                {
+                    noviIdNastupa = (int)cmd.ExecuteScalar() + 1;
+                }
 
                 // 2. Ubacujem nastup vezan za takmičenje
                 var nastupCmd = new NpgsqlCommand(@"
-                INSERT INTO nastup (id_nast, dat_nast, kateg_nast, diploma_id_dipl, takmicenje_id_dog, pijanista_mbr)
-                VALUES (DEFAULT, @date, 'prva', NULL, @idTak, @mbr)", conn, tx);
+                INSERT INTO nastup (id_nast, dat_nast, kateg_nast, takmicenje_id_dog, pijanista_mbr)
+                VALUES (@idNastup, @date, 'prva', @idTak, @mbr)", conn, tx);
+                nastupCmd.Parameters.AddWithValue("idNastup", noviIdNastupa);
                 nastupCmd.Parameters.AddWithValue("idTak", idTakmicenja);
                 nastupCmd.Parameters.AddWithValue("date", izabranoTakmicenjeDatum);
                 nastupCmd.Parameters.AddWithValue("mbr", mbr);
                 nastupCmd.ExecuteNonQuery();
-                Console.WriteLine("Nastup uspešno dodat.");
+                Console.WriteLine("Nastup uspešno dodat. ID nastupa: " + noviIdNastupa);
 
 
-                //3. Ažuriram finansijsku karticu
+                // 3. Ažuriram finansijsku karticu
                 var updateOsobaFinKartiCmd = new NpgsqlCommand(@"
                 UPDATE osoba
-                SET fin_kartica = fin_kartica - 6000 
+                SET fin_kartica = fin_kartica - 6000
                 WHERE mbr = @mbrOsoba;", conn, tx);
                 updateOsobaFinKartiCmd.Parameters.AddWithValue("mbrOsoba", mbr);
                 int updatedRows = updateOsobaFinKartiCmd.ExecuteNonQuery();
@@ -103,18 +118,14 @@ namespace PijanistickiDogadjajApp.DAO
                 }
 
 
-
                 // 4. Ažuriraj uplatu - postavi status na 'uspjesna'
                 var updateUplataCmd = new NpgsqlCommand(@"
                 UPDATE uplata SET stat_uplt = 'uspjesna'
                 WHERE id_uplt = @idUplata;", conn, tx);
-                updateUplataCmd.Parameters.AddWithValue("idUplata", idUplate);
+                updateUplataCmd.Parameters.AddWithValue("idUplata", noviIdUplate); 
                 updateUplataCmd.ExecuteNonQuery();
 
                 Console.WriteLine("Status uplate ažuriran na 'uspjesna'.");
-
-
-
 
                 tx.Commit();
                 return true;
@@ -125,5 +136,5 @@ namespace PijanistickiDogadjajApp.DAO
                 tx.Rollback();
                 return false;
             }
-    }   }
+        }   }
 }
